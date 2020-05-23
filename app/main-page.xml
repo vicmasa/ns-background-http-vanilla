@@ -1,0 +1,39 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
+    <ActionBar title="Test bg image 2.2" icon=""></ActionBar>
+    <ScrollView>
+        <StackLayout class="pl">
+            <StackLayout orientation="horizontal" class="center">
+                <Label text="Multiple" class="pl_r"/>
+                <Switch id="switch" checked="true" checkedChange="onCheckedChange"/>
+                <Label text="Simple" class="pl_l"/> 
+            </StackLayout>
+
+            <Button text="NodeJS local" class="center" type="single" url="0" tap="tapSetUrl"/>
+            <Button text="AWS Test" class="center" type="single" url="1" tap="tapSetUrl"/>
+            <Button text="AWS Prod" class="center" type="single" url="2" tap="tapSetUrl"/>
+
+            <TextField text="{{url}}" textWrap="true"/>
+
+            <Button text="octet-stream" class="center" contentType="0" tap="tapSetContentType"/>
+            <Button text="form-data" class="center" contentType="1" tap="tapSetContentType"/><TextField text="{{contentType}}" textWrap="true"/>            
+
+            <Button text="OBTENER IMAGEN" class="bg_primary white center pm" type="single" tap="tapImagenCamara"/>
+
+            <TextView hint="Content" text="{{content}}" class="border_s round_s border_silver pm"/>
+
+            <Repeater id="listView" items="{{ listView }}"> 
+                <Repeater.itemTemplate> 
+                    <StackLayout class="{{'round_s pm bg_'+color}}">
+                        <Label text="{{ eventTitle }}" class="bold black" textWrap="true"/>
+                        <Label text="{{ eventData }}" textWrap="true"/>
+                    </StackLayout> 
+                </Repeater.itemTemplate>
+            </Repeater> 
+
+            <ActivityIndicator busy="{{ img_st==2?'true':'false' }}" class="green bg_blur circle"  verticalAlignment="middle" width="50" height="50" visibility="{{img_st>1?'visible':'collapsed'}}"/> 
+            
+            <Image src="{{image_url}}" visibility="{{image_url?'visible':'collapsed'}}" width="200" class="round_s" margin="10"/>
+             
+        </StackLayout>
+    </ScrollView>
+</Page>
