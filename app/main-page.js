@@ -28,9 +28,9 @@ exports.onNavigatingTo = function navigatingTo(args) {
 function setUrl(value) {
     let urls;
     if (app.android) {
-        urls = ["http://10.0.2.2:8080", "https://test-ws.viiamonitoring.com", "https://test-lambda.viiamonitoring.com/images-upload"];
+        urls = ["https://lambda.viiamonitoring.com/upload/mobile", "https://test-ws.viiamonitoring.com", "http://10.0.2.2:8080"];
     } else {
-        urls = ["http://localhost:8080", "https://test-ws.viiamonitoring.com", "https://test-lambda.viiamonitoring.com/images-upload"];
+        urls = ["https://lambda.viiamonitoring.com/upload/mobile", "https://test-ws.viiamonitoring.com", "http://localhost:8080"];
     }
 
     ViewModel.set('url', urls[value]);
@@ -173,7 +173,7 @@ function SEND_BACKGROUND(image_url, image_name) {
             "Content": ViewModel.get('content')
         },
         description: "Uploading " + image_name,
-        xxxx: 'yyyy', 
+        xxxx: 'yyyy',
         content: JSON.parse(ViewModel.get('content'))
     };
     var task = session.uploadFile(image_url, request);
@@ -201,7 +201,7 @@ function SEND_BACKGROUND_MULTIPLE(image_url, image_name) {
             "Content": ViewModel.get('content')
         },
         description: "Uploading " + image_name,
-        xxxx: 'yyyy', 
+        xxxx: 'yyyy',
         content: JSON.parse(ViewModel.get('content'))
     };
     const params = [
