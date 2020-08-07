@@ -1,0 +1,25 @@
+<Page xmlns="http://www.nativescript.org/tns.xsd" class="bg_disabled" shownModally="onShownModally"
+    xmlns:ui="nativescript-fancy-camera/view">
+    <GridLayout rows="*,auto,*" class="center" columns="auto">
+        <GridLayout row="1" rows="auto,auto,auto" class="bg_white round_m border_xl border_white">
+            <Label row="0" text="{{isImage?'Imagen':'Video'}}" class="h2 black bg_white pm border_xl border_white round_m" tap="hideModal"/>
+            <Label row="0" text="&#xf131;" class="h2 icon black pm right round_m" tap="hideModal"/>
+            <Label row="0" text="{{total}}" class="h2 icon primary pm center round_m" tap="hideModal"/>
+            <GridLayout row="1" class="bg_white">
+                <ui:CameraView id="cameraView" quality="MAX_480P" width="300" height="400"/>
+            </GridLayout>
+            <GridLayout row="2" visibility="{{isImage?'visible':'collapsed'}}" class="center">
+                <Button text="&#xf13e; Capturar" class="h3 icon bold black bg_white pm border_xl border_white elevation_xs" borderRadius="0" tap="takePhoto" visibility="{{value==null?'visible':'collapsed'}}"/>
+                <Button text="&#xf132; Aceptar" class="h3 icon bold black bg_white pm border_xl border_white elevation_xs" borderRadius="0" tap="itemTap_camera" visibility="{{value==null?'collapsed':'visible'}}"/>
+            </GridLayout>
+            <GridLayout row="2" columns="*,*" visibility="{{isImage?'collapsed':'visible'}}" class="center">
+                <Button col="0" text="{{recording?('&#xf123; Grabando '+seconds):'&#xf122; Capturar'}}" class="h3 icon bold black bg_white pm border_xl border_white elevation_xs" borderRadius="0" tap="recordVideo"/>
+                <Button col="1" text="&#xf132; Aceptar" class="h3 icon bold black bg_white pm border_xl border_white elevation_xs" borderRadius="0" tap="itemTap_camera" visibility="{{value==null?'collapsed':'visible'}}"/>
+            </GridLayout>
+            <ActivityIndicator row="2" busy="{{ !loaded }}" visibility="{{ loaded?'collapsed':'visible' }}" class="bg_grey black"/>
+        </GridLayout>
+    </GridLayout>
+</Page>
+
+<!-- <Image id="image" src="{{ value }}" width="300" height="400" stretch="aspectFit" visibility="{{value==null?'collapsed':'visible'}}"/> -->
+<!-- <Button text="&#xf13e;" tap="tapClear" class="h1 icon white bg_disabled circle elevation_xs" height="80" width="80" visibility="{{value==null?'collapsed':'visible'}}"/> -->
