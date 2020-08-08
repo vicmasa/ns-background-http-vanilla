@@ -161,17 +161,17 @@ function SEND_BACKGROUND(file_url, file_name) {
     const bghttp = require("nativescript-background-http");
     const session = bghttp.session("image-upload");
 
+    const content = getContent(file_name);
     const request = {
         url: url,
         method: "POST",
         headers: {
             "Content-Type": ViewModel.get('contentType').trim(),
-            "File-Name": file_name ,
-            "Content": getContent(file_name)
+            "File-Name": file_name,
+            "Content": content
         },
         description: "Uploading " + file_name,
-        xxxx: 'yyyy',
-        content: JSON.parse(ViewModel.get('content'))
+        // content: content
     };
     var task = session.uploadFile(file_url, request);
 
@@ -189,17 +189,17 @@ function SEND_BACKGROUND_MULTIPLE(file_url, file_name) {
     const url = ViewModel.get('url').trim();
     const bghttp = require("nativescript-background-http");
     const session = bghttp.session("image-upload");
+    const content = getContent(file_name);
     const request = {
         url: url,
         method: "POST",
         headers: {
             "Content-Type": ViewModel.get('contentType').trim(),
-            "File-Name": file_name + ".jpeg",
-            "Content": getContent(file_name + ".jpeg")
+            "File-Name": file_name,
+            "Content": content
         },
         description: "Uploading " + file_name,
-        xxxx: 'yyyy',
-        content: JSON.parse(ViewModel.get('content'))
+        // content: content
     };
     const params = [
         { name: "aaaa", value: "bbbb" },
