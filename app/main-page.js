@@ -168,10 +168,9 @@ function SEND_BACKGROUND(file_url, file_name) {
         headers: {
             "Content-Type": ViewModel.get('contentType').trim(),
             "File-Name": file_name,
-            "Content": content
+            "Content": JSON.stringify(content) //siempre como string
         },
-        description: "Uploading " + file_name,
-        // content: content
+        description: "Uploading " + file_name
     };
     var task = session.uploadFile(file_url, request);
 
@@ -196,10 +195,9 @@ function SEND_BACKGROUND_MULTIPLE(file_url, file_name) {
         headers: {
             "Content-Type": ViewModel.get('contentType').trim(),
             "File-Name": file_name,
-            "Content": content
+            "Content": JSON.stringify(content) //siempre como string
         },
-        description: "Uploading " + file_name,
-        // content: content
+        description: "Uploading " + file_name
     };
     const params = [
         { name: "aaaa", value: "bbbb" },

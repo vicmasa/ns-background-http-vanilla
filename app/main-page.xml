@@ -1,5 +1,5 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
-    <ActionBar title="Test bg image 2.5" icon=""></ActionBar>
+    <ActionBar title="Test bg image 2.7.0" icon=""></ActionBar>
     <ScrollView>
         <StackLayout class="pl">
 
