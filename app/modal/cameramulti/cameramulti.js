@@ -24,7 +24,7 @@ exports.onShownModally = function (args) {
         ViewModel.set('loaded', true);
     }, 2000);
 }
-exports.itemTap_camera = function (args) {
+exports.itemTap_camera = function () {
     if (ViewModel.get('loaded')) {
         console.log('itemTap_camera()');
         closeCallback(ViewModel.get('index'), ViewModel.get('value'));
@@ -49,9 +49,15 @@ function onEvent(args) {
     const file = object.get('file');
     let value = ViewModel.get('value');
     if (value) {
-        value.push(file);
+        value.push({
+            src: file,
+            duration: ViewModel.get('seconds')
+        });
     } else {
-        value = [file];
+        value = [{
+            src: file,
+            duration: ViewModel.get('seconds')
+        }];
     }
     ViewModel.set('value', value);
     if (ViewModel.get('recording')) {
@@ -79,7 +85,6 @@ exports.takePhoto = function () {
 }
 function stopRecording() {
     console.log('stopRecording()');
-    ViewModel.set('seconds', 0);
     ViewModel.set('recording', false);
     try {
         cameraView.stopRecording();
@@ -91,6 +96,7 @@ function stopRecording() {
 function startRecording() {
     console.log('startRecording()');
     ViewModel.set('recording', true);
+    ViewModel.set('seconds', 0);
     try {
         cameraView.startRecording();
         countSecondsRecordVideo();

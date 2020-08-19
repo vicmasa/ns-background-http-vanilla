@@ -4,6 +4,7 @@ const app = require('application');
 
 const ls = require('~/common/ls');
 const dt = require('~/common/dt');
+const files = require('~/common/files');
 const image = require('~/common/image');
 const platform = require('~/common/platform');
 
@@ -33,9 +34,9 @@ exports.onNavigatingTo = function navigatingTo(args) {
 function setUrl(value) {
     let urls;
     if (app.android) {
-        urls = ["https://lambda.viiamanager.com/upload/mobile", "https://dev-lambda.viiamanager.com/upload/mobile", "http://10.0.2.2:8080"];
+        urls = ["https://dev-upload.viiamanager.com", "https://dev-upload.viiamanager.com", "http://10.0.2.2:8080"];
     } else {
-        urls = ["https://lambda.viiamanager.com/upload/mobile", "https://dev-lambda.viiamanager.com/upload/mobile", "http://localhost:8080"];
+        urls = ["https://dev-upload.viiamanager.com", "https://dev-upload.viiamanager.com", "http://localhost:8080"];
     }
 
     ViewModel.set('url', urls[value]);
@@ -61,7 +62,7 @@ exports.tapSetUrl = function (args) {
 }
 
 function setContentType(value) {
-    const contentType = ["multipart/form-data", "application/octet-stream"];
+    const contentType = ["application/octet-stream", "multipart/form-data"];
     ViewModel.set('contentType', contentType[value]);
 }
 
@@ -100,11 +101,19 @@ exports.tapImagenCamara = function (args) {
     image.takePicture(ViewModel.get('path'), ls.getString('platform'), file_name)
         .then(function (r) {
             console.log(r);
+            const size = files.getSizeFile(r);
+            console.log(size);
             ViewModel.set('image_url', r)
+            ls.setJson('last', {
+                file_src: r,
+                file_name: file_name,
+                file_size: size,
+                file_duration: ''
+            });
             if (page.getViewById('switch').checked) {
-                SEND_BACKGROUND(r, file_name);
+                SEND_BACKGROUND(r, file_name, size, '');
             } else {
-                SEND_BACKGROUND_MULTIPLE(r, file_name);
+                SEND_BACKGROUND_MULTIPLE(r, file_name, size, '');
             }
         }).catch(function (err) {
             console.log("Error -> " + err.message);
@@ -152,7 +161,31 @@ function onEvent(e) {
     ViewModel.set('listView', listView);
     page.getViewById('listView').refresh();
 }
-function SEND_BACKGROUND(file_url, file_name) {
+
+function getHeaders(content, file_name) {
+    return {
+        "Content-Type": ViewModel.get('contentType').trim(),
+        "File-Name": file_name,
+        "Content": JSON.stringify(content) //siempre como string
+    };
+}
+function bytesToSize(bytes) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes == 0) return 'n/a';
+    let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    if (i == 0) return bytes + ' ' + sizes[i];
+    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+}
+function setPushSizeDuration(size, duration) {
+    const m = bytesToSize(size);
+    const listView = ViewModel.get('listView');
+    listView.unshift({
+        color: 'white',
+        eventTitle: 'TAMAÑO: ' + m,
+        eventData: 'Bytes: ' + size + ' | Duración: ' + duration +' segundos'
+    });
+}
+function SEND_BACKGROUND(file_url, file_name, size, duration) {
     console.log('SEND_BACKGROUND()');
     console.log(file_url);
     ViewModel.set('listView', []);
@@ -162,14 +195,16 @@ function SEND_BACKGROUND(file_url, file_name) {
     const session = bghttp.session("image-upload");
 
     const content = getContent(file_name);
+    const headers = getHeaders(content, file_name);
+    ViewModel.set('listView', [{
+        color: 'yellow',
+        eventTitle: JSON.stringify(headers)
+    }]);
+    setPushSizeDuration(size, duration);
     const request = {
         url: url,
         method: "POST",
-        headers: {
-            "Content-Type": ViewModel.get('contentType').trim(),
-            "File-Name": file_name,
-            "Content": JSON.stringify(content) //siempre como string
-        },
+        headers: headers,
         description: "Uploading " + file_name
     };
     var task = session.uploadFile(file_url, request);
@@ -180,7 +215,7 @@ function SEND_BACKGROUND(file_url, file_name) {
     task.on("complete", onEvent.bind(this));
 }
 
-function SEND_BACKGROUND_MULTIPLE(file_url, file_name) {
+function SEND_BACKGROUND_MULTIPLE(file_url, file_name, size, duration) {
     console.log('SEND_BACKGROUND_MULTIPLE()');
     console.log(file_url);
     ViewModel.set('listView', []);
@@ -189,14 +224,17 @@ function SEND_BACKGROUND_MULTIPLE(file_url, file_name) {
     const bghttp = require("nativescript-background-http");
     const session = bghttp.session("image-upload");
     const content = getContent(file_name);
+    const headers = getHeaders(content, file_name, size);
+    ViewModel.set('listView', [{
+        color: 'yellow',
+        // eventTitle: 'header',
+        eventTitle: JSON.stringify(headers)
+    }]);
+    setPushSizeDuration(size, duration);
     const request = {
         url: url,
         method: "POST",
-        headers: {
-            "Content-Type": ViewModel.get('contentType').trim(),
-            "File-Name": file_name,
-            "Content": JSON.stringify(content) //siempre como string
-        },
+        headers: headers,
         description: "Uploading " + file_name
     };
     const params = [
@@ -219,6 +257,33 @@ function SEND_BACKGROUND_MULTIPLE(file_url, file_name) {
     task.on("responded", onEvent.bind(this));
     task.on("complete", onEvent.bind(this));
     task.on("cancelled", onEvent.bind(this)); // Android only
+}
+
+exports.tapRepeat = function () {
+    const item = ls.getJson('last');
+    if(item){
+        if (page.getViewById('switch').checked) {
+            SEND_BACKGROUND(item.file_src, item.file_name, item.file_size, item.file_duration);
+        } else {
+            SEND_BACKGROUND_MULTIPLE(item.file_src, item.file_name, item.file_size, item.file_duration);
+        }
+    }
+}
+function getFileName(url) {
+    const last = url.lastIndexOf('/');
+    url = url.substring(last + 1, url.length);
+    return url;
+}
+function getCapturedAt(src) {
+    let name = getFileName(src);
+    name = name.replace('VID_', '').replace('.mp4', '');
+    const y = name.substring(0, 4);
+    const m = name.substring(4, 6);
+    const d = name.substring(6, 8);
+    const hour = name.substring(8, 10);
+    const min = name.substring(10, 12);
+    const seg = name.substring(12, 14);
+    return y + '-' + m + '-' + d + ' ' + hour + ':' + min + ':' + seg;
 }
 //MODAL CAMERA LOGIC
 exports.tapVideoCamara = function () {
@@ -253,11 +318,18 @@ function setModalCamera(params, index) {
         },
         closeCallback: (index, item) => {
             if (index) {
-                const file_name = dt.formatDateTimeMySql(new Date()) + '.mp4';
+                const file_name = getCapturedAt(item[item.length - 1].src);
+                const size = files.getSizeFile(item[item.length - 1].src);
+                ls.setJson('last', {
+                    file_src: item[item.length - 1].src,
+                    file_name: file_name,
+                    file_size: size,
+                    file_duration: item[item.length - 1].duration
+                });
                 if (page.getViewById('switch').checked) {
-                    SEND_BACKGROUND(item[item.length - 1], file_name);
+                    SEND_BACKGROUND(item[item.length - 1].src, file_name, size, item[item.length - 1].duration);
                 } else {
-                    SEND_BACKGROUND_MULTIPLE(item[item.length - 1], file_name);
+                    SEND_BACKGROUND_MULTIPLE(item[item.length - 1].src, file_name, size, item[item.length - 1].duration);
                 }
             }
         },
