@@ -1,2 +1,13 @@
-@import 'app-variables';
-@import 'app-common';
+@import "app-variables";
+@import "app-common";
+.ns-dark ActionBar {
+  background: #212121;
+}
+.ns-light TabView {
+  selected-tab-text-color: black;
+  android-selected-tab-highlight-color: black;
+}
+.ns-dark TabView {
+  selected-tab-text-color: #3d9be9;
+  android-selected-tab-highlight-color: #3d9be9;
+}

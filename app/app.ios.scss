@@ -1,2 +1,46 @@
-@import 'app-variables';
-@import 'app-common';
+@import "app-variables";
+@import "app-common";
+.ns-dark Page {
+  background-color: #212121;
+}
+.ns-dark ActionBar {
+  background-color: #212121;
+}
+.ns-dark .modal {
+  background-color: #212121;
+}
+
+.ns-light TabView {
+  selected-tab-text-color: black;
+  android-selected-tab-highlight-color: black;
+}
+
+.ns-dark TabView {
+  selected-tab-text-color: #3d9be9;
+  android-selected-tab-highlight-color: #3d9be9;
+}
+
+.ns-dark GridLayout[class*="animated_"] {
+  background-color: #424242;
+}
+.ns-dark .black {
+  color: #fafafa;
+}
+.ns-dark .bg_white {
+  background-color: #212121;
+}
+.ns-dark .bg_grey {
+  background-color: #424242;
+}
+.ns-dark .bg_dark_grey {
+  background-color: #616161;
+}
+.ns-dark .bg_silver {
+  background-color: #757575;
+}
+.ns-dark .bg_dark_silver {
+  background-color: #9e9e9e;
+}
+.ns-dark .border_white{
+  border-color: #212121;
+}

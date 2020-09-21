@@ -94,31 +94,6 @@ exports.tapClearImage = function (args) {
     args.object.className += ' scale_in';
     ViewModel.set('image', undefined);
 }
-// exports.tapImagenCamara = function (args) {
-//     ViewModel.set("type", args.object.type);
-//     const file_name = dt.formatDateTimeMySql(new Date()) + '.jpg';
-
-//     image.takePicture(ViewModel.get('path'), ls.getString('platform'), file_name).
-//         then((r) => {
-//             console.log(r);
-//             // const size = files.getSizeFile(r);
-//             // console.log(size);
-//             // ViewModel.set('image_url', r)
-//             // ls.setJson('last', {
-//             //     file_src: r,
-//             //     file_name: file_name,
-//             //     file_size: size,
-//             //     file_duration: ''
-//             // });
-//             // if (page.getViewById('switch').checked) {
-//             //     SEND_BACKGROUND(r, file_name, size, '');
-//             // } else {
-//             //     SEND_BACKGROUND_MULTIPLE(r, file_name, size, '');
-//             // }
-//         }).catch(function (err) {
-//             console.log("Error -> " + err.message);
-//         });
-// }
 function getColor(name, code) {
     let color;
     switch (name) {
@@ -182,12 +157,16 @@ function setPushSizeDuration(size, duration) {
     listView.unshift({
         color: 'white',
         eventTitle: 'TAMAÑO: ' + m,
-        eventData: 'Bytes: ' + size + ' | Duración: ' + duration +' segundos'
+        eventData: 'Bytes: ' + size + ' | Duración: ' + duration + ' segundos'
     });
 }
 function SEND_BACKGROUND(file_url, file_name, size, duration) {
     console.log('SEND_BACKGROUND()');
-    console.log(file_url);
+    // console.log(file_url);
+    // console.log(file_name);
+    // console.log(size);
+    // console.log(duration);
+
     ViewModel.set('listView', []);
 
     const url = ViewModel.get('url').trim();
@@ -261,7 +240,7 @@ function SEND_BACKGROUND_MULTIPLE(file_url, file_name, size, duration) {
 
 exports.tapRepeat = function () {
     const item = ls.getJson('last');
-    if(item){
+    if (item) {
         if (page.getViewById('switch').checked) {
             SEND_BACKGROUND(item.file_src, item.file_name, item.file_size, item.file_duration);
         } else {
@@ -277,16 +256,23 @@ function getFileName(url) {
 function getCapturedAt(src) {
     let name = getFileName(src);
     name = name.replace('VID_', '').replace('.mp4', '');
-    const y = name.substring(0, 4);
-    const m = name.substring(4, 6);
-    const d = name.substring(6, 8);
-    const hour = name.substring(8, 10);
-    const min = name.substring(10, 12);
-    const seg = name.substring(12, 14);
-    return y + '-' + m + '-' + d + ' ' + hour + ':' + min + ':' + seg;
+    name = name.replace('IMG_', '').replace('.jpg', '');
+    if (name.length == 13) {
+        name = parseInt(name);
+        name = dt.formatDateTimeMySql(name);
+        return name;
+    } else {
+        const y = name.substring(0, 4);
+        const m = name.substring(4, 6);
+        const d = name.substring(6, 8);
+        const hour = name.substring(8, 10);
+        const min = name.substring(10, 12);
+        const seg = name.substring(12, 14);
+        return y + '-' + m + '-' + d + ' ' + hour + ':' + min + ':' + seg;
+    }
 }
 //MODAL CAMERA LOGIC
-exports.tapImagenCamara = function(){
+exports.tapImagenCamara = function () {
     setModalCamera(getModalCamera(true), 1);
 }
 exports.tapVideoCamara = function () {
