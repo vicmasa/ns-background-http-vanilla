@@ -5,7 +5,6 @@ const app = require('application');
 const ls = require('~/common/ls');
 const dt = require('~/common/dt');
 const files = require('~/common/files');
-const image = require('~/common/image');
 const platform = require('~/common/platform');
 
 const modalcameramulti = "~/modal/cameramulti/cameramulti";
@@ -95,30 +94,31 @@ exports.tapClearImage = function (args) {
     args.object.className += ' scale_in';
     ViewModel.set('image', undefined);
 }
-exports.tapImagenCamara = function (args) {
-    ViewModel.set("type", args.object.type);
-    const file_name = dt.formatDateTimeMySql(new Date()) + '.jpeg';
-    image.takePicture(ViewModel.get('path'), ls.getString('platform'), file_name)
-        .then(function (r) {
-            console.log(r);
-            const size = files.getSizeFile(r);
-            console.log(size);
-            ViewModel.set('image_url', r)
-            ls.setJson('last', {
-                file_src: r,
-                file_name: file_name,
-                file_size: size,
-                file_duration: ''
-            });
-            if (page.getViewById('switch').checked) {
-                SEND_BACKGROUND(r, file_name, size, '');
-            } else {
-                SEND_BACKGROUND_MULTIPLE(r, file_name, size, '');
-            }
-        }).catch(function (err) {
-            console.log("Error -> " + err.message);
-        });
-}
+// exports.tapImagenCamara = function (args) {
+//     ViewModel.set("type", args.object.type);
+//     const file_name = dt.formatDateTimeMySql(new Date()) + '.jpg';
+
+//     image.takePicture(ViewModel.get('path'), ls.getString('platform'), file_name).
+//         then((r) => {
+//             console.log(r);
+//             // const size = files.getSizeFile(r);
+//             // console.log(size);
+//             // ViewModel.set('image_url', r)
+//             // ls.setJson('last', {
+//             //     file_src: r,
+//             //     file_name: file_name,
+//             //     file_size: size,
+//             //     file_duration: ''
+//             // });
+//             // if (page.getViewById('switch').checked) {
+//             //     SEND_BACKGROUND(r, file_name, size, '');
+//             // } else {
+//             //     SEND_BACKGROUND_MULTIPLE(r, file_name, size, '');
+//             // }
+//         }).catch(function (err) {
+//             console.log("Error -> " + err.message);
+//         });
+// }
 function getColor(name, code) {
     let color;
     switch (name) {
@@ -286,6 +286,9 @@ function getCapturedAt(src) {
     return y + '-' + m + '-' + d + ' ' + hour + ':' + min + ':' + seg;
 }
 //MODAL CAMERA LOGIC
+exports.tapImagenCamara = function(){
+    setModalCamera(getModalCamera(true), 1);
+}
 exports.tapVideoCamara = function () {
     setModalCamera(getModalCamera(), 1);
 }
@@ -303,7 +306,7 @@ function getModalCamera(isImage) {
             total: 0,
             loaded: false,
             recording: false,
-            seconds: 0
+            duration: 0
         }
     }
     return item;

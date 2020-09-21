@@ -3,8 +3,9 @@ const ViewModel = require('./cameramulti-view-model');
 let closeCallback;
 let page;
 //CAMERA
-let cameraView = undefined;
+let cameraView = false;
 let isInit = true;
+const CameraPlus = require('@nstudio/nativescript-camera-plus').CameraPlus;
 //
 exports.onShownModally = function (args) {
     page = args.object;
@@ -13,6 +14,9 @@ exports.onShownModally = function (args) {
     for (const i in item) {
         ViewModel.set(i, item[i]);
     }
+    if (!ViewModel.get('durationmin')) {
+        ViewModel.set('durationmin', 3);
+    }
     page.bindingContext = ViewModel;
     if (args.context.platform == 'android') {
         // eslint-disable-next-line no-undef
@@ -20,9 +24,25 @@ exports.onShownModally = function (args) {
     }
     setTimeout(function () {
         cameraView = page.getViewById("cameraView");
-        setEventListenerCamera();
+        if (isInit) {
+            setEventListenerCamera();
+        }
         ViewModel.set('loaded', true);
-    }, 2000);
+        setFlash();
+    }, 500);
+}
+exports.tapFlash = function () {
+    if (ViewModel.get('loaded')) {
+        cameraView.toggleFlash();
+        setFlash();
+    }
+}
+function setFlash() {
+    if (cameraView.getFlashMode() == 'on') {
+        ViewModel.set('flash', true);
+    } else {//off
+        ViewModel.set('flash', false);
+    }
 }
 exports.itemTap_camera = function () {
     if (ViewModel.get('loaded')) {
@@ -44,62 +64,111 @@ exports.tapClear = function () {
     ViewModel.set('value', null);
 }
 function onEvent(args) {
-    console.log('New finish');
-    const object = args.object;
-    const file = object.get('file');
+    console.log('onEvent()');
+    console.dir(args);
+    setContent(args);
+}
+function setContent(file) {
     let value = ViewModel.get('value');
-    if (value) {
-        value.push({
-            src: file,
-            duration: ViewModel.get('seconds')
-        });
+    if (ViewModel.get('isImage')) {
+        if (value) {
+            value.push({
+                src: file
+            });
+        } else {
+            value = [{
+                src: file
+            }];
+        }
     } else {
-        value = [{
-            src: file,
-            duration: ViewModel.get('seconds')
-        }];
+        if (value) {
+            value.push({
+                src: file,
+                duration: ViewModel.get('duration')
+            });
+        } else {
+            value = [{
+                src: file,
+                duration: ViewModel.get('duration')
+            }];
+        }
+        if (ViewModel.get('recording')) {
+            recordVideo(true);
+        }
     }
     ViewModel.set('value', value);
-    if (ViewModel.get('recording')) {
-        recordVideo(true);
-    }
     ViewModel.set('loaded', true);
     ViewModel.set('total', value.length);
 }
 function setEventListenerCamera() {
+    console.log('NEW LISTENER');
     try {
-        if (isInit) {
-            isInit = false;
-            cameraView.on('finished', onEvent.bind(this));
-        }
+        cameraView.on(CameraPlus.photoCapturedEvent, (event) => {
+            console.log('photoCapturedEvent');
+            onEvent(event.data.android);
+        });
+        cameraView.on(CameraPlus.videoRecordingStartedEvent, () => {
+            console.log('videoRecordingStartedEvent');
+        });
+        cameraView.on(CameraPlus.videoRecordingReadyEvent, (event) => {
+            console.log('videoRecordingReadyEvent');
+            onEvent(event.data);
+        });
     } catch (e) {
         console.log(e);
     }
 }
 exports.takePhoto = function () {
+    console.log('takePhoto()');
     if (ViewModel.get('loaded')) {
-        console.log('takePhoto()');
-        ViewModel.set('loaded', false);
-        cameraView.takePhoto();
+        ViewModel.set('isImage', true);
+        ViewModel.set('intents', ViewModel.get('intents') + 1);
+        cameraView.requestCameraPermissions().then(() => {
+            // if (!cameraView) {
+            //     cameraView = new CameraPlus();
+            // }
+            cameraView.takePicture({
+                confirm: false,
+                saveToGallery: false,
+                keepAspectRatio: true,
+                height: 400,
+                width: 300,
+                autoSquareCrop: false
+            })
+        });
     }
 }
 function stopRecording() {
-    console.log('stopRecording()');
-    ViewModel.set('recording', false);
-    try {
-        cameraView.stopRecording();
-        clearTimeout(timer);
-    } catch (e) {
-        console.log(e);
+    if (ViewModel.get('duration') >= ViewModel.get('durationmin')) {
+        //console.log('stopRecording()');
+        ViewModel.set('recording', false);
+        try {
+            cameraView.stop();
+            clearTimeout(timer);
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 function startRecording() {
-    console.log('startRecording()');
+    //console.log('startRecording()');
     ViewModel.set('recording', true);
-    ViewModel.set('seconds', 0);
+    ViewModel.set('duration', 0);
     try {
-        cameraView.startRecording();
-        countSecondsRecordVideo();
+        clearTimeout(timer);
+        cameraView.requestCameraPermissions().then(() => {
+            if (!cameraView) {
+                cameraView = new CameraPlus();
+            }
+            cameraView.record({
+                quality: 'MAX_480P',
+                confirm: false,
+                saveToGallery: false,
+                height: 400,
+                width: 300
+            });
+            countDurationRecordVideo();
+        });
     } catch (e) {
         console.log(e);
     }
@@ -116,13 +185,13 @@ exports.recordVideo = function () {
         recordVideo();
     }
 }
-let timer = 0;
-function countSecondsRecordVideo() {
+let timer;
+function countDurationRecordVideo() {
     if (timer) {
         clearTimeout(timer);
     }
     timer = setInterval(() => {
-        ViewModel.set('seconds', ViewModel.get('seconds') + 1);
+        ViewModel.set('duration', ViewModel.get('duration') + 1);
     }, 1000);
 }
 //
