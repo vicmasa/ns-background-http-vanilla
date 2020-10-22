@@ -1,5 +1,5 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
-    <ActionBar title="Test bg image 3.0.1" icon=""></ActionBar>
+    <ActionBar title="Test bg image 3.0.2" icon=""></ActionBar>
     <ScrollView>
         <StackLayout class="pl">
 
@@ -10,10 +10,16 @@
             </StackLayout>
             
             <GridLayout columns="*,*,*" class="pl_t">
-                <Button col="0" text="AWS Test" class="center" type="single" url="0" tap="tapSetUrl"/>
-                <Button col="1" text="AWS Prod" class="center" type="single" url="1" tap="tapSetUrl"/>
-                <Button col="2" text="Local" class="center" type="single" url="2" tap="tapSetUrl"/>
+                <Button col="0" text="NodeJS Prod" class="center" type="single" url="0" tap="tapSetUrl"/>
+                <Button col="1" text="NodeJS Test" class="center" type="single" url="1" tap="tapSetUrl"/>
+                <Button col="2" text="NodeJS Local" class="center" type="single" url="2" tap="tapSetUrl"/>
             </GridLayout>
+            <GridLayout columns="*,*,*" class="pl_t">
+                <Button col="0" text="Lambda Prod" class="center" type="single" url="3" tap="tapSetUrl"/>
+                <Button col="1" text="Lambda Test" class="center" type="single" url="4" tap="tapSetUrl"/>
+                <Button col="2" text="Lambda Local" class="center" type="single" url="5" tap="tapSetUrl"/>
+            </GridLayout>
+            
             <TextField text="{{url}}" textWrap="true"/>
 
             <GridLayout columns="*,*" class="pl_t">
@@ -23,7 +29,10 @@
             <TextField text="{{contentType}}" textWrap="true"/>
 
 
-            <Label text="Type buquet servicio" class="pl_t"/>
+            <GridLayout columns="*,*" class="pl_t">
+                <Button col="0" text="pop" class="center" type="single" url="0" tap="tapSetService"/>
+                <Button col="1" text="checking/video" class="center" type="single" url="1" tap="tapSetService"/>
+            </GridLayout>
             <TextField text="{{type}}" textWrap="true"/>
 
             <GridLayout columns="*,*,*" class="pl_t">

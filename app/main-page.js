@@ -16,7 +16,7 @@ exports.onNavigatingTo = function navigatingTo(args) {
     ViewModel.set('image_url', undefined);
     ViewModel.set('img_st', 0);
     ViewModel.set('listView', []);
-    ViewModel.set('type', 'checking/video');
+    ViewModel.set('type', 'pop');
 
     ls.setString('platform', platform.getPlatform());
     setPath();
@@ -27,49 +27,57 @@ exports.onNavigatingTo = function navigatingTo(args) {
     setUrl(0);
     setContentType(0);
 
-    getContent('test');
+    setContent();
 }
 
 function setUrl(value) {
     let urls;
     if (app.android) {
-        urls = ["https://dev-upload.viiamanager.com", "https://dev-upload.viiamanager.com", "http://10.0.2.2:8080"];
+        urls = ['https://upload.viiamanager.com', 'https://dev-upload.viiamanager.com', 'http://10.0.2.2:8080', 'https://lambda.viiamanager.com/upload/mobile', 'https://dev-lambda.viiamanager.com/upload/mobile', 'http://10.0.2.2:8080/upload/mobile'];
     } else {
-        urls = ["https://dev-upload.viiamanager.com", "https://dev-upload.viiamanager.com", "http://localhost:8080"];
+        urls = ['https://upload.viiamanager.com', 'https://dev-upload.viiamanager.com', 'http://localhost:8080', 'https://lambda.viiamanager.com/upload/mobile', 'https://dev-lambda.viiamanager.com/upload/mobile', 'http://localhost:8080/upload/mobile'];
     }
-
     ViewModel.set('url', urls[value]);
 }
-
-function getContent(filename) {
+function setContent() {
     const content = {
         client: 1,
         user: 1,
         unit: 1,
         face: 1,
         type: ViewModel.get('type').trim(),
-        filename: filename,
+        filename: 'test',
         timestamp: '2020-05-18 17:41:56'
     }
     ViewModel.set('content', JSON.stringify(content));
-    return content;
 }
-
+function getContent(filename) {
+    let item = ViewModel.get('content');
+    item = JSON.parse(item);
+    item.type = ViewModel.get('type').trim();
+    if (filename) {
+        item.filename = filename;
+    }
+    ViewModel.set('content', JSON.stringify(item));
+    return item;
+}
 exports.tapSetUrl = function (args) {
     const item = args.object;
     setUrl(item.url);
 }
-
+exports.tapSetService = function (args) {
+    const item = args.object;
+    ViewModel.set('type', item.text);
+    getContent(); 
+}
 function setContentType(value) {
     const contentType = ["application/octet-stream", "multipart/form-data"];
     ViewModel.set('contentType', contentType[value]);
 }
-
 exports.tapSetContentType = function (args) {
     const item = args.object;
     setContentType(item.contentType);
 }
-
 function setPath() {
     const fileSystemModule = require('tns-core-modules/file-system');
     let folderDest = fileSystemModule.knownFolders.currentApp();
